@@ -1,0 +1,177 @@
+package com.tiffintrail.entity;
+
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Entity
+@Table(name = "favorites")
+public class Favorite {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "favorite_id")
+    private Integer favoriteId;
+
+    // Relationships
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    @JsonBackReference
+    private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
+
+    public Favorite() {}
+
+    // Getters and Setters
+    public Integer getFavoriteId() { return favoriteId; }
+    public void setFavoriteId(Integer favoriteId) { this.favoriteId = favoriteId; }
+
+    public Customer getCustomer() { return customer; }
+    public void setCustomer(Customer customer) { this.customer = customer; }
+
+    public Restaurant getRestaurant() { return restaurant; }
+    public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
+}
+
+
+
+
+
+
+package com.tiffintrail.repository;
+
+import com.tiffintrail.entity.Favorite;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface FavoriteRepository extends JpaRepository<Favorite, Integer> {
+    void deleteByCustomerCustomerIdAndRestaurantRestaurantId(Integer customerId, Integer restaurantId);
+    boolean existsByCustomerCustomerIdAndRestaurantRestaurantId(Integer customerId, Integer restaurantId);
+}
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+public interface FavoriteService {
+    void addFavorite(Integer customerId, Integer restaurantId);
+    void removeFavorite(Integer customerId, Integer restaurantId);
+}
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+public interface FavoriteService {
+    void addFavorite(Integer customerId, Integer restaurantId);
+    void removeFavorite(Integer customerId, Integer restaurantId);
+}
+
+
+
+
+
+package com.tiffintrail.service.impl;
+
+import com.tiffintrail.entity.Customer;
+import com.tiffintrail.entity.Favorite;
+import com.tiffintrail.entity.Restaurant;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.CustomerRepository;
+import com.tiffintrail.repository.FavoriteRepository;
+import com.tiffintrail.repository.RestaurantRepository;
+import com.tiffintrail.service.FavoriteService;
+import org.springframework.stereotype.Service;
+
+@Service
+public class FavoriteServiceImpl implements FavoriteService {
+
+    private final FavoriteRepository favoriteRepository;
+    private final CustomerRepository customerRepository;
+    private final RestaurantRepository restaurantRepository;
+
+    public FavoriteServiceImpl(FavoriteRepository favoriteRepository,
+                               CustomerRepository customerRepository,
+                               RestaurantRepository restaurantRepository) {
+        this.favoriteRepository = favoriteRepository;
+        this.customerRepository = customerRepository;
+        this.restaurantRepository = restaurantRepository;
+    }
+
+    @Override
+    public void addFavorite(Integer customerId, Integer restaurantId) {
+        if (favoriteRepository.existsByCustomerCustomerIdAndRestaurantRestaurantId(customerId, restaurantId)) {
+            throw new IllegalArgumentException("This restaurant is already in favorites!");
+        }
+
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new NotFoundException("Customer not found!"));
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new NotFoundException("Restaurant not found!"));
+
+        Favorite favorite = new Favorite();
+        favorite.setCustomer(customer);
+        favorite.setRestaurant(restaurant);
+
+        favoriteRepository.save(favorite);
+    }
+
+    @Override
+    public void removeFavorite(Integer customerId, Integer restaurantId) {
+        favoriteRepository.deleteByCustomerCustomerIdAndRestaurantRestaurantId(customerId, restaurantId);
+    }
+}
+
+
+
+
+
+package com.tiffintrail.controller;
+
+import com.tiffintrail.service.FavoriteService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@Tag(name = "Favorites", description = "Manage customer's favorite restaurants")
+@RestController
+@RequestMapping("/api/customers/{customerId}/favorites")
+public class FavoriteController {
+
+    private final FavoriteService favoriteService;
+
+    public FavoriteController(FavoriteService favoriteService) {
+        this.favoriteService = favoriteService;
+    }
+
+    @PostMapping
+    public ResponseEntity<String> addFavorite(@PathVariable Integer customerId,
+                                              @RequestParam Integer restaurantId) {
+        favoriteService.addFavorite(customerId, restaurantId);
+        return ResponseEntity.ok("Restaurant added to favorites!");
+    }
+
+    @DeleteMapping("/{restaurantId}")
+    public ResponseEntity<String> removeFavorite(@PathVariable Integer customerId,
+                                                 @PathVariable Integer restaurantId) {
+        favoriteService.removeFavorite(customerId, restaurantId);
+        return ResponseEntity.ok("Restaurant removed from favorites!");
+    }
+}
+
+
+
+
+
+
+
+
