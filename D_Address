@@ -1,0 +1,228 @@
+package com.tiffintrail.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Entity
+@Table(name = "delivery_addresses")
+public class DeliveryAddress {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "address_id")
+    private Integer addressId;
+
+    @NotBlank(message = "Address Line 1 is required")
+    @Column(name = "address_line1", nullable = false)
+    private String addressLine1;
+
+    @Column(name = "address_line2")
+    private String addressLine2;
+
+    @NotBlank(message = "City is required")
+    @Column(name = "city", nullable = false)
+    private String city;
+
+    @NotBlank(message = "State is required")
+    @Column(name = "state", nullable = false)
+    private String state;
+
+    @NotBlank(message = "Postal code is required")
+    @Size(min = 5, max = 10, message = "Postal code must be between 5–10 characters")
+    @Column(name = "postal_code", nullable = false)
+    private String postalCode;
+
+    // Relationship: Many addresses belong to one customer
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    @JsonBackReference
+    private Customer customer;
+
+    public DeliveryAddress() {}
+
+    // Getters and Setters
+    public Integer getAddressId() { return addressId; }
+    public void setAddressId(Integer addressId) { this.addressId = addressId; }
+
+    public String getAddressLine1() { return addressLine1; }
+    public void setAddressLine1(String addressLine1) { this.addressLine1 = addressLine1; }
+
+    public String getAddressLine2() { return addressLine2; }
+    public void setAddressLine2(String addressLine2) { this.addressLine2 = addressLine2; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
+
+    public String getPostalCode() { return postalCode; }
+    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
+
+    public Customer getCustomer() { return customer; }
+    public void setCustomer(Customer customer) { this.customer = customer; }
+}
+
+
+
+
+package com.tiffintrail.repository;
+
+import com.tiffintrail.entity.DeliveryAddress;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface DeliveryAddressRepository extends JpaRepository<DeliveryAddress, Integer> {
+    List<DeliveryAddress> findByCustomerCustomerId(Integer customerId);
+}
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.DeliveryAddress;
+import java.util.List;
+
+public interface DeliveryAddressService {
+    DeliveryAddress addAddress(Integer customerId, DeliveryAddress address);
+    DeliveryAddress updateAddress(Integer customerId, Integer addressId, DeliveryAddress address);
+    void deleteAddress(Integer customerId, Integer addressId);
+    List<DeliveryAddress> getAddressesByCustomer(Integer customerId);
+}
+
+
+
+
+
+package com.tiffintrail.service.impl;
+
+import com.tiffintrail.entity.Customer;
+import com.tiffintrail.entity.DeliveryAddress;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.CustomerRepository;
+import com.tiffintrail.repository.DeliveryAddressRepository;
+import com.tiffintrail.service.DeliveryAddressService;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class DeliveryAddressServiceImpl implements DeliveryAddressService {
+
+    private final DeliveryAddressRepository deliveryAddressRepository;
+    private final CustomerRepository customerRepository;
+
+    public DeliveryAddressServiceImpl(DeliveryAddressRepository deliveryAddressRepository,
+                                      CustomerRepository customerRepository) {
+        this.deliveryAddressRepository = deliveryAddressRepository;
+        this.customerRepository = customerRepository;
+    }
+
+    @Override
+    public DeliveryAddress addAddress(Integer customerId, DeliveryAddress address) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new NotFoundException("Customer not found with ID: " + customerId));
+        address.setCustomer(customer);
+        return deliveryAddressRepository.save(address);
+    }
+
+    @Override
+    public DeliveryAddress updateAddress(Integer customerId, Integer addressId, DeliveryAddress address) {
+        DeliveryAddress existing = deliveryAddressRepository.findById(addressId)
+                .orElseThrow(() -> new NotFoundException("Address not found with ID: " + addressId));
+
+        if (!existing.getCustomer().getCustomerId().equals(customerId)) {
+            throw new IllegalArgumentException("This address does not belong to the specified customer!");
+        }
+
+        existing.setAddressLine1(address.getAddressLine1());
+        existing.setAddressLine2(address.getAddressLine2());
+        existing.setCity(address.getCity());
+        existing.setState(address.getState());
+        existing.setPostalCode(address.getPostalCode());
+
+        return deliveryAddressRepository.save(existing);
+    }
+
+    @Override
+    public void deleteAddress(Integer customerId, Integer addressId) {
+        DeliveryAddress address = deliveryAddressRepository.findById(addressId)
+                .orElseThrow(() -> new NotFoundException("Address not found with ID: " + addressId));
+
+        if (!address.getCustomer().getCustomerId().equals(customerId)) {
+            throw new IllegalArgumentException("This address does not belong to the specified customer!");
+        }
+
+        deliveryAddressRepository.delete(address);
+    }
+
+    @Override
+    public List<DeliveryAddress> getAddressesByCustomer(Integer customerId) {
+        return deliveryAddressRepository.findByCustomerCustomerId(customerId);
+    }
+}
+
+
+
+
+
+
+
+package com.tiffintrail.controller;
+
+import com.tiffintrail.entity.DeliveryAddress;
+import com.tiffintrail.service.DeliveryAddressService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@Tag(name = "Delivery Addresses", description = "Manage delivery addresses for customers")
+@RestController
+@RequestMapping("/api/customers/{customerId}/addresses")
+public class DeliveryAddressController {
+
+    private final DeliveryAddressService deliveryAddressService;
+
+    public DeliveryAddressController(DeliveryAddressService deliveryAddressService) {
+        this.deliveryAddressService = deliveryAddressService;
+    }
+
+    @PostMapping
+    public ResponseEntity<DeliveryAddress> addAddress(@PathVariable Integer customerId,
+                                                      @Valid @RequestBody DeliveryAddress address) {
+        return ResponseEntity.ok(deliveryAddressService.addAddress(customerId, address));
+    }
+
+    @PutMapping("/{addressId}")
+    public ResponseEntity<DeliveryAddress> updateAddress(@PathVariable Integer customerId,
+                                                         @PathVariable Integer addressId,
+                                                         @Valid @RequestBody DeliveryAddress address) {
+        return ResponseEntity.ok(deliveryAddressService.updateAddress(customerId, addressId, address));
+    }
+
+    @DeleteMapping("/{addressId}")
+    public ResponseEntity<String> deleteAddress(@PathVariable Integer customerId,
+                                                @PathVariable Integer addressId) {
+        deliveryAddressService.deleteAddress(customerId, addressId);
+        return ResponseEntity.ok("Address deleted successfully!");
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DeliveryAddress>> getAddresses(@PathVariable Integer customerId) {
+        return ResponseEntity.ok(deliveryAddressService.getAddressesByCustomer(customerId));
+    }
+}
+
+
+
+
+
+
+
