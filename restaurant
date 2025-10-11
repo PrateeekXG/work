@@ -1,0 +1,202 @@
+package com.tiffintrail.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.List;
+
+@Entity
+@Table(name = "restaurants")
+public class Restaurant {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "restaurant_id")
+    private Integer restaurantId;
+
+    @NotBlank(message = "Restaurant name is required")
+    @Size(min = 2, max = 100, message = "Restaurant name must be between 2–100 characters")
+    @Column(name = "restaurant_name", nullable = false)
+    private String restaurantName;
+
+    @NotBlank(message = "Address is required")
+    @Column(name = "restaurant_address", nullable = false)
+    private String restaurantAddress;
+
+    @NotBlank(message = "Phone number is required")
+    @Size(min = 10, max = 15, message = "Phone number must be between 10–15 digits")
+    @Column(name = "restaurant_phone", nullable = false)
+    private String restaurantPhone;
+
+    // Relationship: Restaurant ↔ MenuItems
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<MenuItem> menuItems;
+
+    public Restaurant() {}
+
+    // Getters and Setters
+    public Integer getRestaurantId() { return restaurantId; }
+    public void setRestaurantId(Integer restaurantId) { this.restaurantId = restaurantId; }
+
+    public String getRestaurantName() { return restaurantName; }
+    public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
+
+    public String getRestaurantAddress() { return restaurantAddress; }
+    public void setRestaurantAddress(String restaurantAddress) { this.restaurantAddress = restaurantAddress; }
+
+    public String getRestaurantPhone() { return restaurantPhone; }
+    public void setRestaurantPhone(String restaurantPhone) { this.restaurantPhone = restaurantPhone; }
+
+    public List<MenuItem> getMenuItems() { return menuItems; }
+    public void setMenuItems(List<MenuItem> menuItems) { this.menuItems = menuItems; }
+}
+
+
+
+
+
+package com.tiffintrail.repository;
+
+import com.tiffintrail.entity.Restaurant;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface RestaurantRepository extends JpaRepository<Restaurant, Integer> {
+}
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.Restaurant;
+import java.util.List;
+
+public interface RestaurantService {
+    Restaurant addRestaurant(Restaurant restaurant);
+    Restaurant updateRestaurant(Integer id, Restaurant restaurant);
+    void deleteRestaurant(Integer id);
+    Restaurant getRestaurantById(Integer id);
+    List<Restaurant> getAllRestaurants();
+}
+
+
+
+
+
+package com.tiffintrail.service.impl;
+
+import com.tiffintrail.entity.Restaurant;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.RestaurantRepository;
+import com.tiffintrail.service.RestaurantService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class RestaurantServiceImpl implements RestaurantService {
+
+    private final RestaurantRepository restaurantRepository;
+
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository) {
+        this.restaurantRepository = restaurantRepository;
+    }
+
+    @Override
+    public Restaurant addRestaurant(Restaurant restaurant) {
+        return restaurantRepository.save(restaurant);
+    }
+
+    @Override
+    public Restaurant updateRestaurant(Integer id, Restaurant restaurant) {
+        Restaurant existing = restaurantRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Restaurant not found with ID: " + id));
+
+        existing.setRestaurantName(restaurant.getRestaurantName());
+        existing.setRestaurantAddress(restaurant.getRestaurantAddress());
+        existing.setRestaurantPhone(restaurant.getRestaurantPhone());
+        return restaurantRepository.save(existing);
+    }
+
+    @Override
+    public void deleteRestaurant(Integer id) {
+        if (!restaurantRepository.existsById(id)) {
+            throw new NotFoundException("Restaurant not found with ID: " + id);
+        }
+        restaurantRepository.deleteById(id);
+    }
+
+    @Override
+    public Restaurant getRestaurantById(Integer id) {
+        return restaurantRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Restaurant not found with ID: " + id));
+    }
+
+    @Override
+    public List<Restaurant> getAllRestaurants() {
+        return restaurantRepository.findAll();
+    }
+}
+
+
+
+
+
+
+package com.tiffintrail.controller;
+
+import com.tiffintrail.entity.Restaurant;
+import com.tiffintrail.service.RestaurantService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@Tag(name = "Restaurants", description = "Manage restaurants and their menu items")
+@RestController
+@RequestMapping("/api/restaurants")
+public class RestaurantController {
+
+    private final RestaurantService restaurantService;
+
+    public RestaurantController(RestaurantService restaurantService) {
+        this.restaurantService = restaurantService;
+    }
+
+    @PostMapping
+    public ResponseEntity<Restaurant> addRestaurant(@Valid @RequestBody Restaurant restaurant) {
+        return ResponseEntity.ok(restaurantService.addRestaurant(restaurant));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Restaurant> updateRestaurant(@PathVariable Integer id,
+                                                       @Valid @RequestBody Restaurant restaurant) {
+        return ResponseEntity.ok(restaurantService.updateRestaurant(id, restaurant));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
+        return ResponseEntity.ok(restaurantService.getAllRestaurants());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Integer id) {
+        return ResponseEntity.ok(restaurantService.getRestaurantById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteRestaurant(@PathVariable Integer id) {
+        restaurantService.deleteRestaurant(id);
+        return ResponseEntity.ok("Restaurant deleted successfully!");
+    }
+}
+
+
+
