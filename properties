@@ -1,0 +1,65 @@
+application properties 
+
+# ===============================
+# 🚀 SERVER CONFIGURATION
+# ===============================
+server.port=8080
+spring.application.name=TiffinTrail
+
+# ===============================
+# 🗄️ DATABASE CONFIGURATION (MySQL via XAMPP)
+# ===============================
+spring.datasource.url=jdbc:mysql://localhost:3306/tiffintrail?useSSL=false&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# ===============================
+# 🔧 JPA / HIBERNATE CONFIGURATION
+# ===============================
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+# ===============================
+# 📘 SWAGGER / OPENAPI CONFIG
+# ===============================
+springdoc.api-docs.enabled=true
+springdoc.swagger-ui.enabled=true
+springdoc.swagger-ui.path=/swagger-ui/index.html
+
+# Optional: Custom API info (for display on Swagger UI)
+springdoc.api-docs.title=TiffinTrail Food Delivery API
+springdoc.api-docs.description=Backend REST API for managing customers, restaurants, orders, and deliveries.
+springdoc.api-docs.version=1.0.0
+
+# ===============================
+# 🧾 LOGGING CONFIGURATION
+# ===============================
+logging.level.org.springframework=INFO
+logging.level.com.tiffintrail=DEBUG
+logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} - %msg%n
+logging.file.name=logs/tiffintrail.log
+
+# ===============================
+# ⚙️ SPRING VALIDATION / MISC
+# ===============================
+spring.main.allow-bean-definition-overriding=true
+spring.mvc.pathmatch.matching-strategy=ant_path_matcher
+
+
+
+
+
+
+#swagger
+
+@OpenAPIDefinition(
+    info = @Info(
+        title = "TiffinTrail API",
+        version = "1.0.0",
+        description = "API documentation for the TiffinTrail food delivery backend system."
+    )
+)
+
