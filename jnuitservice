@@ -1,0 +1,695 @@
+src/test/java/com/tiffintrail/service
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.Restaurant;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.RestaurantRepository;
+import com.tiffintrail.service.impl.RestaurantServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class RestaurantServiceTest {
+
+    @Mock
+    private RestaurantRepository restaurantRepository;
+
+    @InjectMocks
+    private RestaurantServiceImpl restaurantService;
+
+    private Restaurant restaurant;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        restaurant = new Restaurant();
+        restaurant.setRestaurantId(1);
+        restaurant.setRestaurantName("Tasty Treat");
+        restaurant.setRestaurantAddress("Indore");
+        restaurant.setRestaurantPhone("9876543210");
+    }
+
+    @Test
+    void testAddRestaurant() {
+        when(restaurantRepository.save(any(Restaurant.class))).thenReturn(restaurant);
+
+        Restaurant saved = restaurantService.addRestaurant(restaurant);
+
+        assertNotNull(saved);
+        assertEquals("Tasty Treat", saved.getRestaurantName());
+        verify(restaurantRepository, times(1)).save(restaurant);
+    }
+
+    @Test
+    void testGetRestaurantById_Success() {
+        when(restaurantRepository.findById(1)).thenReturn(Optional.of(restaurant));
+
+        Restaurant found = restaurantService.getRestaurantById(1);
+
+        assertNotNull(found);
+        assertEquals("Indore", found.getRestaurantAddress());
+    }
+
+    @Test
+    void testGetRestaurantById_NotFound() {
+        when(restaurantRepository.findById(2)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> restaurantService.getRestaurantById(2));
+    }
+}
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.Customer;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.CustomerRepository;
+import com.tiffintrail.service.impl.CustomerServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
+import java.util.List;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class CustomerServiceTest {
+
+    @Mock
+    private CustomerRepository customerRepository;
+
+    @InjectMocks
+    private CustomerServiceImpl customerService;
+
+    private Customer customer;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        customer = new Customer();
+        customer.setCustomerId(1);
+        customer.setCustomerName("Prateek");
+        customer.setCustomerEmail("prateek@test.com");
+        customer.setCustomerPhone("9999999999");
+    }
+
+    @Test
+    void testAddCustomer() {
+        when(customerRepository.existsByCustomerEmail(anyString())).thenReturn(false);
+        when(customerRepository.save(any(Customer.class))).thenReturn(customer);
+
+        Customer saved = customerService.addCustomer(customer);
+
+        assertNotNull(saved);
+        assertEquals("Prateek", saved.getCustomerName());
+        verify(customerRepository, times(1)).save(customer);
+    }
+
+    @Test
+    void testGetCustomerById_Success() {
+        when(customerRepository.findById(1)).thenReturn(Optional.of(customer));
+
+        Customer found = customerService.getCustomerById(1);
+
+        assertNotNull(found);
+        assertEquals("prateek@test.com", found.getCustomerEmail());
+    }
+
+    @Test
+    void testDeleteCustomer_NotFound() {
+        when(customerRepository.existsById(5)).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> customerService.deleteCustomer(5));
+    }
+}
+
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.Order;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.OrderRepository;
+import com.tiffintrail.service.impl.OrderServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
+import java.util.List;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class OrderServiceTest {
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @InjectMocks
+    private OrderServiceImpl orderService;
+
+    private Order order;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        order = new Order();
+        order.setOrderId(1);
+        order.setOrderStatus("PENDING");
+        order.setTotalAmount(250.0);
+    }
+
+    @Test
+    void testPlaceOrder() {
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+        Order saved = orderService.placeOrder(order);
+
+        assertNotNull(saved);
+        assertEquals("PENDING", saved.getOrderStatus());
+    }
+
+    @Test
+    void testGetOrderById_Success() {
+        when(orderRepository.findById(1)).thenReturn(Optional.of(order));
+
+        Order found = orderService.getOrderById(1);
+
+        assertEquals(250.0, found.getTotalAmount());
+    }
+
+    @Test
+    void testGetOrderById_NotFound() {
+        when(orderRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> orderService.getOrderById(99));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.MenuItem;
+import com.tiffintrail.entity.Restaurant;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.MenuItemRepository;
+import com.tiffintrail.repository.RestaurantRepository;
+import com.tiffintrail.service.impl.MenuItemServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class MenuItemServiceTest {
+
+    @Mock
+    private MenuItemRepository menuItemRepository;
+
+    @Mock
+    private RestaurantRepository restaurantRepository;
+
+    @InjectMocks
+    private MenuItemServiceImpl menuItemService;
+
+    private Restaurant restaurant;
+    private MenuItem item;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        restaurant = new Restaurant();
+        restaurant.setRestaurantId(1);
+
+        item = new MenuItem();
+        item.setItemId(1);
+        item.setItemName("Paneer Roll");
+        item.setItemPrice(120.0);
+        item.setRestaurant(restaurant);
+    }
+
+    @Test
+    void testAddMenuItem() {
+        when(restaurantRepository.findById(1)).thenReturn(Optional.of(restaurant));
+        when(menuItemRepository.save(any(MenuItem.class))).thenReturn(item);
+
+        MenuItem saved = menuItemService.addMenuItem(1, item);
+        assertEquals("Paneer Roll", saved.getItemName());
+    }
+
+    @Test
+    void testAddMenuItem_RestaurantNotFound() {
+        when(restaurantRepository.findById(2)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> menuItemService.addMenuItem(2, item));
+    }
+
+    @Test
+    void testGetMenuItemsByRestaurant() {
+        when(menuItemRepository.findByRestaurantRestaurantId(1)).thenReturn(Arrays.asList(item));
+        List<MenuItem> list = menuItemService.getMenuItemsByRestaurant(1);
+        assertEquals(1, list.size());
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.DeliveryDriver;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.DeliveryDriverRepository;
+import com.tiffintrail.service.impl.DeliveryDriverServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class DeliveryDriverServiceTest {
+
+    @Mock
+    private DeliveryDriverRepository deliveryDriverRepository;
+
+    @InjectMocks
+    private DeliveryDriverServiceImpl deliveryDriverService;
+
+    private DeliveryDriver driver;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        driver = new DeliveryDriver();
+        driver.setDriverId(1);
+        driver.setDriverName("Amit Sharma");
+        driver.setDriverPhone("9876543210");
+        driver.setDriverVehicle("Bike");
+    }
+
+    @Test
+    void testAddDriver() {
+        when(deliveryDriverRepository.save(any(DeliveryDriver.class))).thenReturn(driver);
+        DeliveryDriver saved = deliveryDriverService.addDriver(driver);
+        assertEquals("Amit Sharma", saved.getDriverName());
+    }
+
+    @Test
+    void testGetDriverById_Success() {
+        when(deliveryDriverRepository.findById(1)).thenReturn(Optional.of(driver));
+        DeliveryDriver found = deliveryDriverService.getDriverById(1);
+        assertEquals("Bike", found.getDriverVehicle());
+    }
+
+    @Test
+    void testGetDriverById_NotFound() {
+        when(deliveryDriverRepository.findById(2)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> deliveryDriverService.getDriverById(2));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.Review;
+import com.tiffintrail.repository.ReviewRepository;
+import com.tiffintrail.service.impl.ReviewServiceImpl;
+import com.tiffintrail.exception.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import java.util.Optional;
+import java.util.List;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class ReviewServiceTest {
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    @InjectMocks
+    private ReviewServiceImpl reviewService;
+
+    private Review review;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        review = new Review();
+        review.setReviewId(1);
+        review.setRating(5);
+        review.setReviewText("Great taste!");
+    }
+
+    @Test
+    void testAddReview() {
+        when(reviewRepository.save(any(Review.class))).thenReturn(review);
+        Review saved = reviewService.addReview(review);
+        assertEquals(5, saved.getRating());
+    }
+
+    @Test
+    void testGetReviewsByRestaurant() {
+        when(reviewRepository.findByRestaurantRestaurantId(1)).thenReturn(Arrays.asList(review));
+        List<Review> list = reviewService.getReviewsByRestaurant(1);
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    void testDeleteReview_NotFound() {
+        when(reviewRepository.existsById(10)).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> reviewService.deleteReview(10));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.Coupon;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.CouponRepository;
+import com.tiffintrail.service.impl.CouponServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.time.LocalDate;
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class CouponServiceTest {
+
+    @Mock
+    private CouponRepository couponRepository;
+
+    @InjectMocks
+    private CouponServiceImpl couponService;
+
+    private Coupon coupon;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        coupon = new Coupon();
+        coupon.setCouponId(1);
+        coupon.setCouponCode("SAVE20");
+        coupon.setDiscountPercent(20);
+        coupon.setExpiryDate(LocalDate.now().plusDays(5));
+    }
+
+    @Test
+    void testAddCoupon() {
+        when(couponRepository.save(any(Coupon.class))).thenReturn(coupon);
+        Coupon saved = couponService.addCoupon(coupon);
+        assertEquals("SAVE20", saved.getCouponCode());
+    }
+
+    @Test
+    void testGetCouponByCode_Success() {
+        when(couponRepository.findByCouponCode("SAVE20")).thenReturn(Optional.of(coupon));
+        Coupon found = couponService.getCouponByCode("SAVE20");
+        assertEquals(20, found.getDiscountPercent());
+    }
+
+    @Test
+    void testGetCouponByCode_NotFound() {
+        when(couponRepository.findByCouponCode("INVALID")).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> couponService.getCouponByCode("INVALID"));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.Customer;
+import com.tiffintrail.entity.Favorite;
+import com.tiffintrail.entity.Restaurant;
+import com.tiffintrail.repository.CustomerRepository;
+import com.tiffintrail.repository.FavoriteRepository;
+import com.tiffintrail.repository.RestaurantRepository;
+import com.tiffintrail.service.impl.FavoriteServiceImpl;
+import com.tiffintrail.exception.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import static org.mockito.Mockito.*;
+
+public class FavoriteServiceTest {
+
+    @Mock
+    private FavoriteRepository favoriteRepository;
+
+    @Mock
+    private CustomerRepository customerRepository;
+
+    @Mock
+    private RestaurantRepository restaurantRepository;
+
+    @InjectMocks
+    private FavoriteServiceImpl favoriteService;
+
+    private Customer customer;
+    private Restaurant restaurant;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        customer = new Customer();
+        customer.setCustomerId(1);
+        restaurant = new Restaurant();
+        restaurant.setRestaurantId(2);
+    }
+
+    @Test
+    void testAddFavorite() {
+        when(customerRepository.findById(1)).thenReturn(java.util.Optional.of(customer));
+        when(restaurantRepository.findById(2)).thenReturn(java.util.Optional.of(restaurant));
+        when(favoriteRepository.existsByCustomerCustomerIdAndRestaurantRestaurantId(1, 2)).thenReturn(false);
+
+        favoriteService.addFavorite(1, 2);
+        verify(favoriteRepository, times(1)).save(any(Favorite.class));
+    }
+
+    @Test
+    void testAddFavorite_AlreadyExists() {
+        when(favoriteRepository.existsByCustomerCustomerIdAndRestaurantRestaurantId(1, 2)).thenReturn(true);
+        assertThrows(IllegalArgumentException.class, () -> favoriteService.addFavorite(1, 2));
+    }
+
+    @Test
+    void testRemoveFavorite() {
+        favoriteService.removeFavorite(1, 2);
+        verify(favoriteRepository, times(1)).deleteByCustomerCustomerIdAndRestaurantRestaurantId(1, 2);
+    }
+}
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.DeliveryArea;
+import com.tiffintrail.entity.Restaurant;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.DeliveryAreaRepository;
+import com.tiffintrail.repository.RestaurantRepository;
+import com.tiffintrail.service.impl.DeliveryAreaServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import java.util.Optional;
+import java.util.List;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class DeliveryAreaServiceTest {
+
+    @Mock
+    private DeliveryAreaRepository deliveryAreaRepository;
+
+    @Mock
+    private RestaurantRepository restaurantRepository;
+
+    @InjectMocks
+    private DeliveryAreaServiceImpl deliveryAreaService;
+
+    private Restaurant restaurant;
+    private DeliveryArea area;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        restaurant = new Restaurant();
+        restaurant.setRestaurantId(1);
+
+        area = new DeliveryArea();
+        area.setAreaId(1);
+        area.setAreaName("Vijay Nagar");
+        area.setRestaurant(restaurant);
+    }
+
+    @Test
+    void testAddDeliveryArea() {
+        when(restaurantRepository.findById(1)).thenReturn(Optional.of(restaurant));
+        when(deliveryAreaRepository.save(any(DeliveryArea.class))).thenReturn(area);
+        DeliveryArea saved = deliveryAreaService.addDeliveryArea(1, area);
+        assertEquals("Vijay Nagar", saved.getAreaName());
+    }
+
+    @Test
+    void testAddDeliveryArea_RestaurantNotFound() {
+        when(restaurantRepository.findById(2)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> deliveryAreaService.addDeliveryArea(2, area));
+    }
+
+    @Test
+    void testGetAreasByRestaurant() {
+        when(deliveryAreaRepository.findByRestaurantRestaurantId(1)).thenReturn(Arrays.asList(area));
+        List<DeliveryArea> list = deliveryAreaService.getAreasByRestaurant(1);
+        assertEquals(1, list.size());
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
