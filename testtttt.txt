@@ -1,0 +1,423 @@
+package com.example.tiffin_trail.service;
+
+import com.example.tiffin_trail.entity.Coupon;
+import com.example.tiffin_trail.exception.NotFoundException;
+import com.example.tiffin_trail.repository.CouponRepository;
+import com.example.tiffin_trail.service.impl.CouponServiceImpl;
+import org.junit.jupiter.api.*;
+import org.mockito.*;
+import java.time.LocalDate;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class CouponServiceTest {
+
+    @Mock
+    private CouponRepository repo;
+
+    @InjectMocks
+    private CouponServiceImpl service;
+
+    private Coupon c;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        c = new Coupon();
+        c.setCouponId(1);
+        c.setCouponCode("SAVE100");
+        c.setDiscountAmount(100.0);
+        c.setExpiryDate(LocalDate.now().plusDays(2));
+    }
+
+    @Test
+    void addCoupon_success() {
+        when(repo.save(any(Coupon.class))).thenReturn(c);
+        assertEquals("SAVE100", service.addCoupon(c).getCouponCode());
+    }
+
+    @Test
+    void addCoupon_expired_throws() {
+        c.setExpiryDate(LocalDate.now().minusDays(1));
+        assertThrows(IllegalArgumentException.class, () -> service.addCoupon(c));
+    }
+
+    @Test
+    void getAllCoupons_returnsList() {
+        when(repo.findAll()).thenReturn(Collections.singletonList(c));
+        assertEquals(1, service.getAllCoupons().size());
+    }
+
+    @Test
+    void getAllCoupons_emptyList() {
+        when(repo.findAll()).thenReturn(Collections.emptyList());
+        assertTrue(service.getAllCoupons().isEmpty());
+    }
+
+    @Test
+    void addCoupon_verifySaveCalled() {
+        service.addCoupon(c);
+        verify(repo, atMostOnce()).save(any(Coupon.class));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+package com.example.tiffin_trail.service;
+
+import com.example.tiffin_trail.entity.Customer;
+import com.example.tiffin_trail.exception.NotFoundException;
+import com.example.tiffin_trail.repository.CustomerRepository;
+import com.example.tiffin_trail.service.impl.CustomerServiceImpl;
+import org.junit.jupiter.api.*;
+import org.mockito.*;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class CustomerServiceTest {
+
+    @Mock
+    private CustomerRepository repo;
+
+    @InjectMocks
+    private CustomerServiceImpl service;
+
+    private Customer cust;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        cust = new Customer();
+        cust.setCustomerId(1);
+        cust.setCustomerName("Prateek");
+        cust.setCustomerEmail("prateek@mail.com");
+        cust.setCustomerPhone("9876543210");
+    }
+
+    @Test
+    void saveCustomer_success() {
+        when(repo.save(any(Customer.class))).thenReturn(cust);
+        assertEquals("Prateek", service.saveCustomer(cust).getCustomerName());
+    }
+
+    @Test
+    void getAllCustomers_returnsList() {
+        when(repo.findAll()).thenReturn(Collections.singletonList(cust));
+        assertEquals(1, service.getAllCustomers().size());
+    }
+
+    @Test
+    void getCustomerById_success() {
+        when(repo.findById(1)).thenReturn(Optional.of(cust));
+        assertEquals("prateek@mail.com", service.getCustomerById(1).getCustomerEmail());
+    }
+
+    @Test
+    void getCustomerById_notFound_throws() {
+        when(repo.findById(99)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> service.getCustomerById(99));
+    }
+
+    @Test
+    void deleteCustomer_success() {
+        when(repo.existsById(1)).thenReturn(true);
+        assertDoesNotThrow(() -> service.deleteCustomer(1));
+        verify(repo).deleteById(1);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package com.example.tiffin_trail.service;
+
+import com.example.tiffin_trail.entity.Customer;
+import com.example.tiffin_trail.entity.DeliveryAddress;
+import com.example.tiffin_trail.exception.NotFoundException;
+import com.example.tiffin_trail.repository.CustomerRepository;
+import com.example.tiffin_trail.repository.DeliveryAddressRepository;
+import com.example.tiffin_trail.service.impl.DeliveryAddressServiceImpl;
+import org.junit.jupiter.api.*;
+import org.mockito.*;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class DeliveryAddressServiceTest {
+
+    @Mock
+    private DeliveryAddressRepository addrRepo;
+
+    @Mock
+    private CustomerRepository custRepo;
+
+    @InjectMocks
+    private DeliveryAddressServiceImpl service;
+
+    private Customer customer;
+    private DeliveryAddress address;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        customer = new Customer();
+        customer.setCustomerId(1);
+        address = new DeliveryAddress();
+        address.setAddressId(10);
+        address.setAddressLine1("123 MG Road");
+        address.setCity("Bhopal");
+        address.setState("MP");
+        address.setPostalCode("462001");
+    }
+
+    @Test
+    void addAddress_success() {
+        when(custRepo.findById(1)).thenReturn(Optional.of(customer));
+        when(addrRepo.save(any(DeliveryAddress.class))).thenReturn(address);
+        assertEquals("Bhopal", service.addAddress(1, address).getCity());
+    }
+
+    @Test
+    void addAddress_customerMissing_throws() {
+        when(custRepo.findById(2)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> service.addAddress(2, address));
+    }
+
+    @Test
+    void getAddressesByCustomer_returnsList() {
+        when(addrRepo.findByCustomerCustomerId(1)).thenReturn(Collections.singletonList(address));
+        assertEquals(1, service.getAddressesByCustomer(1).size());
+    }
+
+    @Test
+    void getAddressesByCustomer_empty() {
+        when(addrRepo.findByCustomerCustomerId(1)).thenReturn(Collections.emptyList());
+        assertTrue(service.getAddressesByCustomer(1).isEmpty());
+    }
+
+    @Test
+    void deleteAddress_notFound_throws() {
+        when(addrRepo.existsById(9)).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> service.deleteAddress(1, 9));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+package com.example.tiffin_trail.service;
+
+import com.example.tiffin_trail.entity.DeliveryArea;
+import com.example.tiffin_trail.repository.DeliveryAreaRepository;
+import com.example.tiffin_trail.service.impl.DeliveryAreaServiceImpl;
+import org.junit.jupiter.api.*;
+import org.mockito.*;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class DeliveryAreaServiceTest {
+
+    @Mock
+    private DeliveryAreaRepository repo;
+
+    @InjectMocks
+    private DeliveryAreaServiceImpl service;
+
+    private DeliveryArea a;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        a = new DeliveryArea();
+        a.setAreaId(1);
+        a.setAreaName("Vijay Nagar");
+    }
+
+    @Test
+    void getDeliveryAreasByRestaurant_returnsList() {
+        when(repo.findByRestaurantRestaurantId(1)).thenReturn(Collections.singletonList(a));
+        assertEquals(1, service.getDeliveryAreasByRestaurant(1).size());
+    }
+
+    @Test
+    void getDeliveryAreasByRestaurant_empty() {
+        when(repo.findByRestaurantRestaurantId(2)).thenReturn(Collections.emptyList());
+        assertTrue(service.getDeliveryAreasByRestaurant(2).isEmpty());
+    }
+
+    @Test
+    void getDeliveryAreasByRestaurant_multiple() {
+        DeliveryArea b = new DeliveryArea();
+        b.setAreaId(2);
+        when(repo.findByRestaurantRestaurantId(1)).thenReturn(Arrays.asList(a, b));
+        assertEquals(2, service.getDeliveryAreasByRestaurant(1).size());
+    }
+
+    @Test
+    void getDeliveryAreasByRestaurant_nullAllowed() {
+        when(repo.findByRestaurantRestaurantId(3)).thenReturn(null);
+        assertNull(service.getDeliveryAreasByRestaurant(3));
+    }
+
+    @Test
+    void verifyRepoCall() {
+        service.getDeliveryAreasByRestaurant(5);
+        verify(repo).findByRestaurantRestaurantId(5);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+package com.example.tiffin_trail.service;
+
+import com.example.tiffin_trail.entity.DeliveryDriver;
+import com.example.tiffin_trail.exception.NotFoundException;
+import com.example.tiffin_trail.repository.DeliveryDriverRepository;
+import com.example.tiffin_trail.service.impl.DeliveryDriverServiceImpl;
+import org.junit.jupiter.api.*;
+import org.mockito.*;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class DeliveryDriverServiceTest {
+
+    @Mock
+    private DeliveryDriverRepository repo;
+
+    @InjectMocks
+    private DeliveryDriverServiceImpl service;
+
+    private DeliveryDriver d;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        d = new DeliveryDriver();
+        d.setDriverId(1);
+        d.setDriverName("Amit");
+        d.setDriverPhone("9999999999");
+        d.setDriverVehicle("Bike");
+    }
+
+    @Test
+    void addDriver_success() {
+        when(repo.save(any(DeliveryDriver.class))).thenReturn(d);
+        assertEquals("Amit", service.addDriver(d).getDriverName());
+    }
+
+    @Test
+    void getAllDrivers_returnsList() {
+        when(repo.findAll()).thenReturn(Collections.singletonList(d));
+        assertEquals(1, service.getAllDrivers().size());
+    }
+
+    @Test
+    void getDriverById_success() {
+        when(repo.findById(1)).thenReturn(Optional.of(d));
+        assertEquals("Bike", service.getDriverById(1).getDriverVehicle());
+    }
+
+    @Test
+    void getDriverById_notFound_throws() {
+        when(repo.findById(9)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> service.getDriverById(9));
+    }
+
+    @Test
+    void deleteDriver_success() {
+        when(repo.existsById(1)).thenReturn(true);
+        assertDoesNotThrow(() -> service.deleteDriver(1));
+        verify(repo).deleteById(1);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
