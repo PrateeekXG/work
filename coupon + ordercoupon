@@ -1,0 +1,277 @@
+package com.tiffintrail.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "coupons")
+public class Coupon {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "coupon_id")
+    private Integer couponId;
+
+    @NotBlank(message = "Coupon code is required")
+    @Column(name = "coupon_code", nullable = false, unique = true)
+    private String couponCode;
+
+    @NotNull(message = "Discount percentage is required")
+    @Min(value = 1, message = "Discount must be at least 1%")
+    @Max(value = 100, message = "Discount cannot exceed 100%")
+    @Column(name = "discount_percent", nullable = false)
+    private Integer discountPercent;
+
+    @NotNull(message = "Expiry date is required")
+    @Column(name = "expiry_date", nullable = false)
+    private LocalDate expiryDate;
+
+    public Coupon() {}
+
+    // Getters / Setters
+    public Integer getCouponId() { return couponId; }
+    public void setCouponId(Integer couponId) { this.couponId = couponId; }
+
+    public String getCouponCode() { return couponCode; }
+    public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
+
+    public Integer getDiscountPercent() { return discountPercent; }
+    public void setDiscountPercent(Integer discountPercent) { this.discountPercent = discountPercent; }
+
+    public LocalDate getExpiryDate() { return expiryDate; }
+    public void setExpiryDate(LocalDate expiryDate) { this.expiryDate = expiryDate; }
+}
+
+
+
+
+
+
+package com.tiffintrail.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Entity
+@Table(name = "order_coupons")
+public class OrderCoupon {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = "order_id", nullable = false)
+    @JsonBackReference
+    private Order order;
+
+    @ManyToOne
+    @JoinColumn(name = "coupon_id", nullable = false)
+    private Coupon coupon;
+
+    @NotNull(message = "Discount amount is required")
+    @Column(name = "discount_amount", nullable = false)
+    private Double discountAmount;
+
+    public OrderCoupon() {}
+
+    // Getters / Setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public Order getOrder() { return order; }
+    public void setOrder(Order order) { this.order = order; }
+
+    public Coupon getCoupon() { return coupon; }
+    public void setCoupon(Coupon coupon) { this.coupon = coupon; }
+
+    public Double getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(Double discountAmount) { this.discountAmount = discountAmount; }
+}
+
+
+
+
+
+
+
+package com.tiffintrail.repository;
+
+import com.tiffintrail.entity.Coupon;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
+
+@Repository
+public interface CouponRepository extends JpaRepository<Coupon, Integer> {
+    Optional<Coupon> findByCouponCode(String couponCode);
+}
+
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.repository;
+
+import com.tiffintrail.entity.OrderCoupon;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface OrderCouponRepository extends JpaRepository<OrderCoupon, Integer> {
+}
+
+
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.Coupon;
+import java.util.List;
+
+public interface CouponService {
+    Coupon addCoupon(Coupon coupon);
+    Coupon getCouponByCode(String code);
+    List<Coupon> getAllCoupons();
+    void deleteCoupon(Integer id);
+}
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.service.impl;
+
+import com.tiffintrail.entity.Coupon;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.CouponRepository;
+import com.tiffintrail.service.CouponService;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+public class CouponServiceImpl implements CouponService {
+
+    private final CouponRepository couponRepository;
+
+    public CouponServiceImpl(CouponRepository couponRepository) {
+        this.couponRepository = couponRepository;
+    }
+
+    @Override
+    public Coupon addCoupon(Coupon coupon) {
+        if (coupon.getExpiryDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Cannot add expired coupon!");
+        }
+        return couponRepository.save(coupon);
+    }
+
+    @Override
+    public Coupon getCouponByCode(String code) {
+        return couponRepository.findByCouponCode(code)
+                .orElseThrow(() -> new NotFoundException("Coupon not found for code: " + code));
+    }
+
+    @Override
+    public List<Coupon> getAllCoupons() {
+        return couponRepository.findAll();
+    }
+
+    @Override
+    public void deleteCoupon(Integer id) {
+        if (!couponRepository.existsById(id)) {
+            throw new NotFoundException("Coupon not found with ID: " + id);
+        }
+        couponRepository.deleteById(id);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+package com.tiffintrail.controller;
+
+import com.tiffintrail.entity.Coupon;
+import com.tiffintrail.service.CouponService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@Tag(name = "Coupons", description = "Manage discount coupons and promo codes")
+@RestController
+@RequestMapping("/api/coupons")
+public class CouponController {
+
+    private final CouponService couponService;
+
+    public CouponController(CouponService couponService) {
+        this.couponService = couponService;
+    }
+
+    @PostMapping
+    public ResponseEntity<Coupon> addCoupon(@Valid @RequestBody Coupon coupon) {
+        return ResponseEntity.ok(couponService.addCoupon(coupon));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Coupon>> getAllCoupons() {
+        return ResponseEntity.ok(couponService.getAllCoupons());
+    }
+
+    @GetMapping("/{code}")
+    public ResponseEntity<Coupon> getCouponByCode(@PathVariable String code) {
+        return ResponseEntity.ok(couponService.getCouponByCode(code));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCoupon(@PathVariable Integer id) {
+        couponService.deleteCoupon(id);
+        return ResponseEntity.ok("Coupon deleted successfully!");
+    }
+}
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+
