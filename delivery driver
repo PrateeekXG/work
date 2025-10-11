@@ -1,0 +1,219 @@
+package com.tiffintrail.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.List;
+
+@Entity
+@Table(name = "delivery_drivers")
+public class DeliveryDriver {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "driver_id")
+    private Integer driverId;
+
+    @NotBlank(message = "Driver name is required")
+    @Size(min = 2, max = 100, message = "Driver name must be between 2–100 characters")
+    @Column(name = "driver_name", nullable = false)
+    private String driverName;
+
+    @NotBlank(message = "Driver phone number is required")
+    @Size(min = 10, max = 15, message = "Phone number must be between 10–15 digits")
+    @Column(name = "driver_phone", nullable = false)
+    private String driverPhone;
+
+    @NotBlank(message = "Vehicle type is required")
+    @Column(name = "driver_vehicle", nullable = false)
+    private String driverVehicle;
+
+    @Column(name = "current_location")
+    private String currentLocation;
+
+    // Relationship: One Driver ↔ Many Orders
+    @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Order> orders;
+
+    public DeliveryDriver() {}
+
+    // Getters and Setters
+    public Integer getDriverId() { return driverId; }
+    public void setDriverId(Integer driverId) { this.driverId = driverId; }
+
+    public String getDriverName() { return driverName; }
+    public void setDriverName(String driverName) { this.driverName = driverName; }
+
+    public String getDriverPhone() { return driverPhone; }
+    public void setDriverPhone(String driverPhone) { this.driverPhone = driverPhone; }
+
+    public String getDriverVehicle() { return driverVehicle; }
+    public void setDriverVehicle(String driverVehicle) { this.driverVehicle = driverVehicle; }
+
+    public String getCurrentLocation() { return currentLocation; }
+    public void setCurrentLocation(String currentLocation) { this.currentLocation = currentLocation; }
+
+    public List<Order> getOrders() { return orders; }
+    public void setOrders(List<Order> orders) { this.orders = orders; }
+}
+
+
+
+
+package com.tiffintrail.repository;
+
+import com.tiffintrail.entity.DeliveryDriver;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface DeliveryDriverRepository extends JpaRepository<DeliveryDriver, Integer> {
+}
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.DeliveryDriver;
+import java.util.List;
+
+public interface DeliveryDriverService {
+    DeliveryDriver addDriver(DeliveryDriver driver);
+    DeliveryDriver updateDriver(Integer driverId, DeliveryDriver driver);
+    void deleteDriver(Integer driverId);
+    DeliveryDriver getDriverById(Integer driverId);
+    List<DeliveryDriver> getAllDrivers();
+    DeliveryDriver updateDriverLocation(Integer driverId, String location);
+}
+
+
+
+
+
+
+
+
+package com.tiffintrail.service.impl;
+
+import com.tiffintrail.entity.DeliveryDriver;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.DeliveryDriverRepository;
+import com.tiffintrail.service.DeliveryDriverService;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class DeliveryDriverServiceImpl implements DeliveryDriverService {
+
+    private final DeliveryDriverRepository deliveryDriverRepository;
+
+    public DeliveryDriverServiceImpl(DeliveryDriverRepository deliveryDriverRepository) {
+        this.deliveryDriverRepository = deliveryDriverRepository;
+    }
+
+    @Override
+    public DeliveryDriver addDriver(DeliveryDriver driver) {
+        return deliveryDriverRepository.save(driver);
+    }
+
+    @Override
+    public DeliveryDriver updateDriver(Integer driverId, DeliveryDriver driver) {
+        DeliveryDriver existing = getDriverById(driverId);
+        existing.setDriverName(driver.getDriverName());
+        existing.setDriverPhone(driver.getDriverPhone());
+        existing.setDriverVehicle(driver.getDriverVehicle());
+        return deliveryDriverRepository.save(existing);
+    }
+
+    @Override
+    public void deleteDriver(Integer driverId) {
+        if (!deliveryDriverRepository.existsById(driverId)) {
+            throw new NotFoundException("Driver not found with ID: " + driverId);
+        }
+        deliveryDriverRepository.deleteById(driverId);
+    }
+
+    @Override
+    public DeliveryDriver getDriverById(Integer driverId) {
+        return deliveryDriverRepository.findById(driverId)
+                .orElseThrow(() -> new NotFoundException("Driver not found with ID: " + driverId));
+    }
+
+    @Override
+    public List<DeliveryDriver> getAllDrivers() {
+        return deliveryDriverRepository.findAll();
+    }
+
+    @Override
+    public DeliveryDriver updateDriverLocation(Integer driverId, String location) {
+        DeliveryDriver driver = getDriverById(driverId);
+        driver.setCurrentLocation(location);
+        return deliveryDriverRepository.save(driver);
+    }
+}
+
+
+
+
+
+
+package com.tiffintrail.controller;
+
+import com.tiffintrail.entity.DeliveryDriver;
+import com.tiffintrail.service.DeliveryDriverService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@Tag(name = "Delivery Drivers", description = "Manage drivers and their assigned orders")
+@RestController
+@RequestMapping("/api/drivers")
+public class DeliveryDriverController {
+
+    private final DeliveryDriverService deliveryDriverService;
+
+    public DeliveryDriverController(DeliveryDriverService deliveryDriverService) {
+        this.deliveryDriverService = deliveryDriverService;
+    }
+
+    @PostMapping
+    public ResponseEntity<DeliveryDriver> addDriver(@Valid @RequestBody DeliveryDriver driver) {
+        return ResponseEntity.ok(deliveryDriverService.addDriver(driver));
+    }
+
+    @PutMapping("/{driverId}")
+    public ResponseEntity<DeliveryDriver> updateDriver(@PathVariable Integer driverId,
+                                                       @Valid @RequestBody DeliveryDriver driver) {
+        return ResponseEntity.ok(deliveryDriverService.updateDriver(driverId, driver));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DeliveryDriver>> getAllDrivers() {
+        return ResponseEntity.ok(deliveryDriverService.getAllDrivers());
+    }
+
+    @GetMapping("/{driverId}")
+    public ResponseEntity<DeliveryDriver> getDriverById(@PathVariable Integer driverId) {
+        return ResponseEntity.ok(deliveryDriverService.getDriverById(driverId));
+    }
+
+    @PutMapping("/{driverId}/location")
+    public ResponseEntity<DeliveryDriver> updateDriverLocation(@PathVariable Integer driverId,
+                                                               @RequestParam String location) {
+        return ResponseEntity.ok(deliveryDriverService.updateDriverLocation(driverId, location));
+    }
+
+    @DeleteMapping("/{driverId}")
+    public ResponseEntity<String> deleteDriver(@PathVariable Integer driverId) {
+        deliveryDriverService.deleteDriver(driverId);
+        return ResponseEntity.ok("Driver deleted successfully!");
+    }
+}
+
+
