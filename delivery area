@@ -1,0 +1,180 @@
+package com.tiffintrail.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Entity
+@Table(name = "delivery_areas")
+public class DeliveryArea {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "area_id")
+    private Integer areaId;
+
+    @NotBlank(message = "Area name is required")
+    @Column(name = "area_name", nullable = false)
+    private String areaName;
+
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    @JsonBackReference
+    private Restaurant restaurant;
+
+    public DeliveryArea() {}
+
+    // Getters and Setters
+    public Integer getAreaId() { return areaId; }
+    public void setAreaId(Integer areaId) { this.areaId = areaId; }
+
+    public String getAreaName() { return areaName; }
+    public void setAreaName(String areaName) { this.areaName = areaName; }
+
+    public Restaurant getRestaurant() { return restaurant; }
+    public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
+}
+
+
+
+
+
+package com.tiffintrail.repository;
+
+import com.tiffintrail.entity.DeliveryArea;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface DeliveryAreaRepository extends JpaRepository<DeliveryArea, Integer> {
+    List<DeliveryArea> findByRestaurantRestaurantId(Integer restaurantId);
+}
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.DeliveryArea;
+import java.util.List;
+
+public interface DeliveryAreaService {
+    DeliveryArea addDeliveryArea(Integer restaurantId, DeliveryArea deliveryArea);
+    List<DeliveryArea> getAreasByRestaurant(Integer restaurantId);
+    void deleteDeliveryArea(Integer restaurantId, Integer areaId);
+}
+
+
+
+
+
+
+
+package com.tiffintrail.service.impl;
+
+import com.tiffintrail.entity.DeliveryArea;
+import com.tiffintrail.entity.Restaurant;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.DeliveryAreaRepository;
+import com.tiffintrail.repository.RestaurantRepository;
+import com.tiffintrail.service.DeliveryAreaService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class DeliveryAreaServiceImpl implements DeliveryAreaService {
+
+    private final DeliveryAreaRepository deliveryAreaRepository;
+    private final RestaurantRepository restaurantRepository;
+
+    public DeliveryAreaServiceImpl(DeliveryAreaRepository deliveryAreaRepository,
+                                   RestaurantRepository restaurantRepository) {
+        this.deliveryAreaRepository = deliveryAreaRepository;
+        this.restaurantRepository = restaurantRepository;
+    }
+
+    @Override
+    public DeliveryArea addDeliveryArea(Integer restaurantId, DeliveryArea deliveryArea) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new NotFoundException("Restaurant not found with ID: " + restaurantId));
+        deliveryArea.setRestaurant(restaurant);
+        return deliveryAreaRepository.save(deliveryArea);
+    }
+
+    @Override
+    public List<DeliveryArea> getAreasByRestaurant(Integer restaurantId) {
+        return deliveryAreaRepository.findByRestaurantRestaurantId(restaurantId);
+    }
+
+    @Override
+    public void deleteDeliveryArea(Integer restaurantId, Integer areaId) {
+        DeliveryArea area = deliveryAreaRepository.findById(areaId)
+                .orElseThrow(() -> new NotFoundException("Area not found with ID: " + areaId));
+
+        if (!area.getRestaurant().getRestaurantId().equals(restaurantId)) {
+            throw new IllegalArgumentException("This area does not belong to the specified restaurant!");
+        }
+
+        deliveryAreaRepository.delete(area);
+    }
+}
+
+
+
+
+
+
+
+
+package com.tiffintrail.controller;
+
+import com.tiffintrail.entity.DeliveryArea;
+import com.tiffintrail.service.DeliveryAreaService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@Tag(name = "Delivery Areas", description = "Manage areas served by each restaurant")
+@RestController
+@RequestMapping("/api/restaurants/{restaurantId}/areas")
+public class DeliveryAreaController {
+
+    private final DeliveryAreaService deliveryAreaService;
+
+    public DeliveryAreaController(DeliveryAreaService deliveryAreaService) {
+        this.deliveryAreaService = deliveryAreaService;
+    }
+
+    @PostMapping
+    public ResponseEntity<DeliveryArea> addDeliveryArea(@PathVariable Integer restaurantId,
+                                                        @Valid @RequestBody DeliveryArea deliveryArea) {
+        return ResponseEntity.ok(deliveryAreaService.addDeliveryArea(restaurantId, deliveryArea));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DeliveryArea>> getAreasByRestaurant(@PathVariable Integer restaurantId) {
+        return ResponseEntity.ok(deliveryAreaService.getAreasByRestaurant(restaurantId));
+    }
+
+    @DeleteMapping("/{areaId}")
+    public ResponseEntity<String> deleteDeliveryArea(@PathVariable Integer restaurantId,
+                                                     @PathVariable Integer areaId) {
+        deliveryAreaService.deleteDeliveryArea(restaurantId, areaId);
+        return ResponseEntity.ok("Delivery area deleted successfully!");
+    }
+}
+
+
+
+
+
+
+
+
+
+
