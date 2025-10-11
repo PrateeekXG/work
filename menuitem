@@ -1,0 +1,222 @@
+package com.tiffintrail.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Entity
+@Table(name = "menu_items")
+public class MenuItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id")
+    private Integer itemId;
+
+    @NotBlank(message = "Item name is required")
+    @Column(name = "item_name", nullable = false)
+    private String itemName;
+
+    @NotBlank(message = "Item description is required")
+    @Column(name = "item_description", nullable = false)
+    private String itemDescription;
+
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be a positive number")
+    @Column(name = "item_price", nullable = false)
+    private Double itemPrice;
+
+    // Relationship: Many items belong to one restaurant
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    @JsonBackReference
+    private Restaurant restaurant;
+
+    public MenuItem() {}
+
+    // Getters and Setters
+    public Integer getItemId() { return itemId; }
+    public void setItemId(Integer itemId) { this.itemId = itemId; }
+
+    public String getItemName() { return itemName; }
+    public void setItemName(String itemName) { this.itemName = itemName; }
+
+    public String getItemDescription() { return itemDescription; }
+    public void setItemDescription(String itemDescription) { this.itemDescription = itemDescription; }
+
+    public Double getItemPrice() { return itemPrice; }
+    public void setItemPrice(Double itemPrice) { this.itemPrice = itemPrice; }
+
+    public Restaurant getRestaurant() { return restaurant; }
+    public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
+}
+
+
+
+
+
+
+package com.tiffintrail.repository;
+
+import com.tiffintrail.entity.MenuItem;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface MenuItemRepository extends JpaRepository<MenuItem, Integer> {
+    List<MenuItem> findByRestaurantRestaurantId(Integer restaurantId);
+}
+
+
+
+
+
+
+
+
+package com.tiffintrail.service;
+
+import com.tiffintrail.entity.MenuItem;
+import java.util.List;
+
+public interface MenuItemService {
+    MenuItem addMenuItem(Integer restaurantId, MenuItem menuItem);
+    MenuItem updateMenuItem(Integer restaurantId, Integer itemId, MenuItem menuItem);
+    void deleteMenuItem(Integer restaurantId, Integer itemId);
+    List<MenuItem> getMenuItemsByRestaurant(Integer restaurantId);
+}
+
+
+
+
+
+
+
+
+package com.tiffintrail.service.impl;
+
+import com.tiffintrail.entity.MenuItem;
+import com.tiffintrail.entity.Restaurant;
+import com.tiffintrail.exception.NotFoundException;
+import com.tiffintrail.repository.MenuItemRepository;
+import com.tiffintrail.repository.RestaurantRepository;
+import com.tiffintrail.service.MenuItemService;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class MenuItemServiceImpl implements MenuItemService {
+
+    private final MenuItemRepository menuItemRepository;
+    private final RestaurantRepository restaurantRepository;
+
+    public MenuItemServiceImpl(MenuItemRepository menuItemRepository, RestaurantRepository restaurantRepository) {
+        this.menuItemRepository = menuItemRepository;
+        this.restaurantRepository = restaurantRepository;
+    }
+
+    @Override
+    public MenuItem addMenuItem(Integer restaurantId, MenuItem menuItem) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new NotFoundException("Restaurant not found with ID: " + restaurantId));
+        menuItem.setRestaurant(restaurant);
+        return menuItemRepository.save(menuItem);
+    }
+
+    @Override
+    public MenuItem updateMenuItem(Integer restaurantId, Integer itemId, MenuItem menuItem) {
+        MenuItem existing = menuItemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Menu item not found with ID: " + itemId));
+
+        if (!existing.getRestaurant().getRestaurantId().equals(restaurantId)) {
+            throw new IllegalArgumentException("Menu item does not belong to this restaurant!");
+        }
+
+        existing.setItemName(menuItem.getItemName());
+        existing.setItemDescription(menuItem.getItemDescription());
+        existing.setItemPrice(menuItem.getItemPrice());
+        return menuItemRepository.save(existing);
+    }
+
+    @Override
+    public void deleteMenuItem(Integer restaurantId, Integer itemId) {
+        MenuItem item = menuItemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Menu item not found with ID: " + itemId));
+
+        if (!item.getRestaurant().getRestaurantId().equals(restaurantId)) {
+            throw new IllegalArgumentException("Menu item does not belong to this restaurant!");
+        }
+
+        menuItemRepository.delete(item);
+    }
+
+    @Override
+    public List<MenuItem> getMenuItemsByRestaurant(Integer restaurantId) {
+        return menuItemRepository.findByRestaurantRestaurantId(restaurantId);
+    }
+}
+
+
+
+
+
+
+
+package com.tiffintrail.controller;
+
+import com.tiffintrail.entity.MenuItem;
+import com.tiffintrail.service.MenuItemService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@Tag(name = "Menu Items", description = "Manage menu items for each restaurant")
+@RestController
+@RequestMapping("/api/restaurants/{restaurantId}/menu")
+public class MenuItemController {
+
+    private final MenuItemService menuItemService;
+
+    public MenuItemController(MenuItemService menuItemService) {
+        this.menuItemService = menuItemService;
+    }
+
+    @PostMapping
+    public ResponseEntity<MenuItem> addMenuItem(@PathVariable Integer restaurantId,
+                                                @Valid @RequestBody MenuItem menuItem) {
+        return ResponseEntity.ok(menuItemService.addMenuItem(restaurantId, menuItem));
+    }
+
+    @PutMapping("/{itemId}")
+    public ResponseEntity<MenuItem> updateMenuItem(@PathVariable Integer restaurantId,
+                                                   @PathVariable Integer itemId,
+                                                   @Valid @RequestBody MenuItem menuItem) {
+        return ResponseEntity.ok(menuItemService.updateMenuItem(restaurantId, itemId, menuItem));
+    }
+
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<String> deleteMenuItem(@PathVariable Integer restaurantId,
+                                                 @PathVariable Integer itemId) {
+        menuItemService.deleteMenuItem(restaurantId, itemId);
+        return ResponseEntity.ok("Menu item deleted successfully!");
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MenuItem>> getMenuItems(@PathVariable Integer restaurantId) {
+        return ResponseEntity.ok(menuItemService.getMenuItemsByRestaurant(restaurantId));
+    }
+}
+
+
+
+
+
+
+
+
+
