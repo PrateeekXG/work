@@ -1,0 +1,15 @@
+<SystemPermissionType code="viewpaddiinfo" desc="Permission to view Policy Additional Info screen"/>
+<SystemPermissionType code="editpaddiinfo" desc="Permission to edit Policy Additional Info screen"/>
+
+
+<Role code="Underwriter">
+   <Permission permKey="viewpaddiinfo"/>
+   <Permission permKey="editpaddiinfo"/>
+</Role>
+
+<Role code="Producer">
+   <Permission permKey="viewpaddiinfo"/>
+</Role>
+
+
+
