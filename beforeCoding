@@ -1,0 +1,12 @@
+Before generating any code:
+
+1. Analyze the current repository.
+2. Identify existing entities, typelists, services, enhancements, plugins, utility classes, and coding patterns.
+3. Reuse existing methods whenever possible.
+4. Do NOT invent class names, field names, typelists, methods, or entities.
+5. Search the codebase for similar implementations and follow the same pattern.
+6. Verify imports and references before generating code.
+7. Mention any assumptions explicitly.
+8. If a required class or field does not exist, tell me instead of creating a fake implementation.
+
+Generate production-ready Guidewire Gosu code that compiles within the existing project structure.
