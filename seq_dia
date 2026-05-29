@@ -1,0 +1,58 @@
+You are a Senior Guidewire PolicyCenter Architect.
+
+I want to understand the complete execution flow when I click a specific button in Guidewire PolicyCenter.
+
+Your task:
+
+1. Find the PCF file containing the button.
+2. Identify the button action, command, or event handler.
+3. Trace the execution path automatically through the entire codebase.
+4. Follow all Gosu methods, enhancements, delegates, services, plugins, rules, integrations, work queues, and batch processes invoked.
+5. Continue tracing until the final outcome is reached (database update, quote generation, policy change, API call, document creation, messaging event, etc.).
+6. Do not stop at the first method call. Recursively analyze all downstream calls.
+7. Identify:
+   - PCF files
+   - Gosu classes
+   - Enhancements
+   - Entities
+   - Rule Sets
+   - Plugins
+   - Messaging Destinations
+   - Integration Services
+   - Database operations
+8. Explain the purpose of each step.
+9. Highlight validation logic, business rules, and transaction boundaries.
+10. Generate a detailed Sequence Diagram in PlantUML format.
+
+Output format:
+
+# Functional Summary
+
+# Execution Flow
+
+Step 1:
+Component:
+File:
+Purpose:
+
+Step 2:
+...
+
+# Components Involved
+
+| Type | Name | File |
+|------|------|------|
+
+# Sequence Diagram (PlantUML)
+
+# Database Operations
+
+# Integrations
+
+# Business Rules Triggered
+
+# Potential Impact Areas
+
+# End-to-End Flow Summary
+
+Button Name: <BUTTON_NAME>
