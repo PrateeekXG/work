@@ -57,3 +57,13 @@ Output Format:
 7. Verify all referenced classes, entities, builders, and helper methods exist in the repository before generating code.
 
 Generate production-ready GUnit code that follows the repository's existing testing framework and naming conventions.
+
+
+
+
+
+
+
+
+Verify that every class, method, entity, builder, and helper used in the GUnit test exists in the repository.
+Highlight any unresolved references before I commit the code.
