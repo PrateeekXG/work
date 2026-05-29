@@ -1,0 +1,59 @@
+You are a Senior Guidewire PolicyCenter Developer and GUnit Testing Expert.
+
+Task: Generate GUnit test cases for the Driver Age Validation implemented in Personal Auto Line.
+
+Before generating tests:
+
+1. Analyze the existing validation implementation.
+2. Identify:
+
+   * Validation rule location.
+   * Entity involved.
+   * Existing GUnit test patterns in the repository.
+   * Existing test utilities, builders, and test data factories.
+3. Reuse existing project test conventions.
+4. Do NOT invent entities, helper methods, builders, or test classes.
+
+Generate GUnit test cases for the following scenarios:
+
+Scenario 1: Driver age = 18
+Expected Result:
+
+* Validation passes.
+* No errors generated.
+
+Scenario 2: Driver age > 18
+Expected Result:
+
+* Validation passes.
+* No errors generated.
+
+Scenario 3: Driver age = 17
+Expected Result:
+
+* Validation fails.
+* Error message displayed:
+  "Driver must be at least 18 years old."
+
+Scenario 4: Multiple drivers where one driver is under 18
+Expected Result:
+
+* Validation fails.
+* Correct driver validation error generated.
+
+Scenario 5: Driver DOB is null (if allowed by business rules)
+Expected Result:
+
+* Verify expected behavior based on existing implementation.
+
+Output Format:
+
+1. Test Class Name
+2. Test Setup
+3. Test Data Creation
+4. GUnit Test Methods
+5. Assertions
+6. Test Coverage Summary
+7. Verify all referenced classes, entities, builders, and helper methods exist in the repository before generating code.
+
+Generate production-ready GUnit code that follows the repository's existing testing framework and naming conventions.
