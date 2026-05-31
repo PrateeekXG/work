@@ -1,0 +1,84 @@
+Before generating any code:
+
+1. Search the repository for:
+   - validationExpression=
+   - DateOfBirth
+   - age validation
+   - DateUtil
+   - existing Personal Auto validations
+
+2. Show existing examples found.
+
+3. Identify:
+   - Existing validation patterns
+   - Existing date calculation utilities
+   - Existing error message patterns
+
+4. Reuse existing implementations whenever possible.
+
+5. Do NOT create:
+   - New classes
+   - New enhancements
+   - New utilities
+
+Only after completing the analysis, generate the solution.
+
+
+
+You are a Senior Guidewire PolicyCenter Developer.
+
+Context:
+
+I am working on a Personal Auto Line policy creation flow.
+
+I need to implement an age validation on the Date of Birth field below:
+
+<DateInput
+    id="DateOfBirth"
+    value="policyContactRole.DateOfBirth"
+    validationExpression=""
+/>
+
+Business Requirement:
+
+- During Personal Auto policy creation, the driver must be at least 18 years old.
+- If age is less than 18, show:
+  "Driver age cannot be less than 18 years."
+- If age is 18 or greater, validation should pass.
+- Handle null DOB safely.
+
+Important Instructions:
+
+1. This validation will be implemented in the PCF DateInput's validationExpression property.
+2. Use policyContactRole.DateOfBirth as the DOB field.
+3. Search the repository for existing validationExpression examples before generating code.
+4. Search the repository for existing date/age calculation utilities before generating code.
+5. Reuse existing utilities if available.
+6. Do NOT create:
+   - New classes
+   - New enhancements
+   - New utility methods
+   - New entities
+7. If no utility exists, generate the logic directly in validationExpression.
+8. Follow existing repository coding patterns.
+9. Verify every method, utility, and reference exists before generating code.
+10. Explain any assumptions made.
+
+Output:
+
+1. Exact validationExpression code
+2. Error message implementation
+3. Existing utility used (if any)
+4. Explanation of age calculation logic
+5. Verification that all references exist
+6. GUnit test cases for:
+   - Age = 18
+   - Age > 18
+   - Age = 17
+   - Null DOB
+   - Boundary date scenarios
+
+Also explain:
+
+- Whether this validation should additionally be implemented as a business validation/rule.
+- Potential ways a UI-only validation could be bypassed (integration, API, batch, import, etc.).
