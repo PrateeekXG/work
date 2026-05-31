@@ -1,0 +1,50 @@
+Read the CSV in chunks.
+
+Build a searchable incident knowledge base.
+
+Store:
+- Incident patterns
+- Root causes
+- Resolutions
+- Functional mappings
+- Technical mappings
+
+Use this knowledge base for future incident analysis.
+
+Also identify:
+- Top recurring incident categories
+- Top recurring root causes
+- Common Guidewire modules impacted
+- Common business processes impacted
+
+Do not analyze individual incidents yet.
+
+
+
+
+
+Summarize what you learned from the incident dump.
+
+Show:
+- Top 20 incident categories
+- Top 20 root causes
+- Top 20 resolutions
+- Most common functional issues
+- Most common technical issues
+
+
+
+
+
+Using the incident knowledge base, analyze:
+
+<incident details>
+
+Find similar incidents and provide:
+- Root cause
+- Resolution
+- Functional impact
+- Technical impact
+- Possible code area
+- Investigation steps
+- Confidence score
