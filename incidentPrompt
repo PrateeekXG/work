@@ -1,0 +1,95 @@
+Analyze the uploaded incident CSV and build an incident knowledge base.
+
+Tasks:
+
+1. Understand all columns and their meaning.
+2. Identify:
+   - Incident categories
+   - Functional issues
+   - Technical issues
+   - Integration issues
+   - Batch issues
+   - Data issues
+3. Find recurring patterns.
+4. Group similar incidents together.
+5. Identify:
+   - Most common root causes
+   - Most common resolutions
+   - Most impacted Guidewire modules
+   - Most impacted business processes
+
+Output:
+
+- Top 20 incident categories
+- Top recurring root causes
+- Top recurring resolutions
+- Guidewire areas most frequently impacted
+
+Do NOT analyze individual incidents yet.
+
+
+
+
+
+
+Read the CSV in chunks.
+
+Build a searchable incident knowledge base.
+
+Store:
+- Incident patterns
+- Root causes
+- Resolutions
+- Functional mappings
+- Technical mappings
+
+Use this knowledge base for future incident analysis.
+Wait for my next incident.
+
+
+
+
+
+
+
+Using the uploaded incident knowledge base, analyze this incident:
+
+<PASTE INCIDENT HERE>Provide:
+
+Incident Classification
+
+Similar Historical Incidents
+
+- Incident Number
+- Similarity %
+- Root Cause
+- Resolution
+
+Most Likely Cause
+
+Why It Happened
+
+Functional Impact
+
+Technical Impact
+
+Possible Code Area
+
+- PCF
+- Gosu Class
+- Rule
+- Entity
+- Plugin
+- Integration
+- Batch
+
+Investigation Steps
+
+Immediate Resolution
+
+Permanent Fix
+
+Confidence Score
+
+
+
