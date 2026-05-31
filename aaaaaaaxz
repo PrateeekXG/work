@@ -1,50 +1,67 @@
-Read the CSV in chunks.
+Analyze the uploaded incident CSV.
 
-Build a searchable incident knowledge base.
+Do NOT create:
+- Files
+- Folders
+- Python scripts
+- JSON files
+- Databases
+- Requirements.txt
+- Workspace changes
 
-Store:
-- Incident patterns
-- Root causes
-- Resolutions
-- Functional mappings
-- Technical mappings
+Analyze only.
 
-Use this knowledge base for future incident analysis.
+Read the CSV and identify:
 
-Also identify:
-- Top recurring incident categories
-- Top recurring root causes
-- Common Guidewire modules impacted
-- Common business processes impacted
+1. Top incident categories
+2. Common root causes
+3. Common resolutions
+4. Functional issue patterns
+5. Technical issue patterns
+6. Guidewire modules frequently impacted
+7. Business processes frequently impacted
+
+Output a concise summary.
 
 Do not analyze individual incidents yet.
 
 
 
 
+Based on the uploaded CSV, create an incident knowledge base summary.
 
-Summarize what you learned from the incident dump.
+For each major category provide:
 
-Show:
-- Top 20 incident categories
-- Top 20 root causes
-- Top 20 resolutions
-- Most common functional issues
-- Most common technical issues
+- Category Name
+- Common Root Causes
+- Common Resolutions
+- Common Guidewire Components
+- Common Business Impact
+
+Output only the analysis.
+Do not create code or files.
 
 
 
 
+Using the uploaded incident history, analyze:
 
-Using the incident knowledge base, analyze:
+<paste incident>
 
-<incident details>
+Provide:
 
-Find similar incidents and provide:
-- Root cause
-- Resolution
-- Functional impact
-- Technical impact
-- Possible code area
-- Investigation steps
-- Confidence score
+# Similar Historical Incidents
+
+# Most Likely Cause
+
+# Functional Impact
+
+# Technical Impact
+
+# Possible Guidewire Code Area
+
+# Investigation Steps
+
+# Immediate Resolution
+
+# Confidence Score
