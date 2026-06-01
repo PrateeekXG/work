@@ -1,0 +1,42 @@
+Act as a Senior Guidewire Integration Developer and mentor.
+
+I want to learn Guidewire Messaging Framework from this repository.
+
+Analyze the entire codebase and identify all messaging-related implementations.
+
+Teach me:
+
+1. What Guidewire Messaging is and why it is used.
+2. How messaging is implemented in this project.
+3. What business events trigger messages.
+4. How messages are created and queued.
+5. How destinations are configured.
+6. How transport plugins work.
+7. How payloads are generated.
+8. How external systems are called.
+9. How acknowledgements and responses are handled.
+10. How retries, failures, and error handling work.
+
+For every messaging implementation found:
+
+- Explain the business purpose.
+- Explain the end-to-end flow in simple language.
+- Show the important files involved.
+- Explain each file's responsibility.
+- Trace the execution path from trigger event to external system call.
+
+Also create:
+
+- Beginner explanation
+- Intermediate explanation
+- Advanced explanation
+
+Provide:
+
+- Architecture flow diagrams
+- Sequence diagrams
+- Common Guidewire messaging patterns used in the project
+- Best practices followed in the repository
+- Common interview questions related to the discovered implementation
+
+Finally, create a step-by-step learning path so that a developer with no Guidewire Messaging experience can understand and implement a new messaging integration after studying the existing code.
