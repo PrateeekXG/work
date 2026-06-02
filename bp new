@@ -1,0 +1,46 @@
+Create a Guidewire PolicyCenter Batch Process named PolicyRenewalReminder.
+
+Before generating any implementation:
+
+1. Analyze the existing codebase and identify how custom batch processes are implemented in this project.
+2. Determine the actual batch process framework, class hierarchy, plugin registrations, scheduler configuration approach, typecode structure, and coding patterns used.
+3. Use only patterns that are verified from the codebase.
+4. Do not assume implementation details based on generic Guidewire examples.
+
+Requirement:
+- Retrieve all active policies whose expiration date is within the next 35 days.
+- Do not create activities, notifications, emails, or updates.
+- Only fetch and display policy details.
+
+Display:
+- Policy Number
+- Account Name
+- Effective Date
+- Expiration Date
+
+At the end display:
+- Total Policies Found
+
+Strict Rules:
+- Do not invent typecodes.
+- Do not invent method names.
+- Do not invent class names.
+- Do not invent plugin registrations.
+- Do not invent scheduler entries.
+- Do not invent XML configurations.
+- Do not generate placeholder values.
+- If information cannot be determined from the codebase, mark it as "TBD".
+- Every implementation step must reference a verified pattern found in the project.
+
+Output:
+1. Existing Batch Process Pattern Analysis
+2. Files Requiring Modification
+3. Business Logic Design
+4. Query Design
+5. Execution Flow
+6. HLD
+7. LLD
+8. TBD Items
+9. Implementation Plan
+
+Only generate implementation details that can be verified from the analyzed codebase.
