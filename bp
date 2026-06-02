@@ -1,0 +1,27 @@
+Analyze the process for creating a new Batch Process in Guidewire based ONLY on the following information and an existing reference implementation.
+
+Reference Batch Process:
+- Typecode: BulkSubmission
+- Class Name: BulkSubmission
+
+Creation Process:
+1. Add a new typecode in batchprocesstype.ttx typelist.
+2. Add category usage (such as uirunnable and schedulable) from BatchProcessTypeUsage for the created typecode.
+3. Create a class extending BatchProcessBase.
+4. Create a constructor and override the doWork() method.
+5. Implement the business logic inside doWork().
+6. Configure scheduling requirements in scheduler-config.xml.
+7. Update ProcessesPlugin.gs and add a switch case:
+   case BatchProcessType.TC_<TYPECODE>:
+       return new <CLASSNAME>()
+
+8. Replace TC_<TYPECODE> with the actual typecode and <CLASSNAME> with the created batch process class.
+
+Task:
+- Analyze the existing Batch Process implementation for typecode "BulkSubmission" and class "BulkSubmission".
+- Identify all files, configurations, dependencies, patterns, and implementation details used.
+- Explain the purpose of each modification.
+- Document the complete flow from typecode creation to execution.
+- Highlight any validations, plugin registrations, scheduler configurations, Gosu classes, XML changes, and best practices observed.
+- Do not generate new code yet.
+- Only analyze and document how the existing BulkSubmission batch process is implemented so the same pattern can be reused for future batch processes.
