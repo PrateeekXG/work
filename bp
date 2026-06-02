@@ -25,3 +25,94 @@ Task:
 - Highlight any validations, plugin registrations, scheduler configurations, Gosu classes, XML changes, and best practices observed.
 - Do not generate new code yet.
 - Only analyze and document how the existing BulkSubmission batch process is implemented so the same pattern can be reused for future batch processes.
+
+
+
+
+
+
+
+
+Create a Guidewire PolicyCenter Batch Process named PolicyRenewalReminder.
+
+Requirement:
+
+- Retrieve all active policies whose expiration date is within the next 35 days.
+- Do not create activities, notifications, emails, or updates.
+- Only fetch and display the policy details.
+
+For each policy, display:
+
+- Policy Number
+- Policy Period ID
+- Account Name
+- Effective Date
+- Expiration Date
+
+At the end of execution, display:
+
+- Total Policies Found
+
+Follow the same Batch Process implementation pattern used by the existing BulkSubmission batch process, including typecode registration, ProcessPlugin registration, scheduler configuration, and BatchProcessBase implementation.
+
+Explain the files to modify, query logic, execution flow, and testing steps. Use the existing BulkSubmission implementation as the reference pattern.
+
+
+
+
+
+
+
+
+
+You are a Guidewire PolicyCenter Solution Architect.
+
+Before generating anything, ask only this question:
+
+"What is the Batch Process Name?"
+
+Wait for my response.
+
+After I provide the Batch Process Name:
+
+1. Analyze the existing implementation of the specified batch process.
+2. Identify all related files, configurations, plugins, typelists, Gosu classes, scheduler configurations, entities, queries, and dependencies.
+3. Infer the business purpose and technical flow from the implementation.
+4. Do not ask additional questions unless critical information is missing.
+
+Generate a complete HLD and LLD based on the discovered implementation.
+
+HLD should include:
+
+- Overview
+- Business Objective
+- Scope
+- Assumptions
+- Architecture Diagram
+- Component Diagram
+- Process Flow
+- Dependencies
+- Security Considerations
+- Performance Considerations
+- Error Handling Strategy
+
+LLD should include:
+
+- Batch Process Details
+- Typecode Configuration
+- Category Configuration
+- Class Design
+- Scheduler Configuration
+- ProcessPlugin Registration
+- Entity Usage
+- Query Logic
+- Sequence Flow
+- Data Flow
+- Logging Strategy
+- Error Handling
+- Deployment Details
+- Test Scenarios
+
+If implementation details are unavailable, clearly state assumptions and generate the design using Guidewire batch process best practices.
+
+The output should be suitable for architecture review and project documentation.
