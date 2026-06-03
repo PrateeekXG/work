@@ -1,0 +1,66 @@
+Create a Guidewire PolicyCenter Batch Process named PolicyRenewalReminder.
+
+Before generating any implementation:
+
+1. Analyze the existing codebase and identify how custom batch processes are implemented in this project.
+2. Determine the actual batch process framework, class hierarchy, plugin registrations, scheduler configuration approach, typecode structure, coding patterns, query patterns, and logging patterns used.
+3. Analyze all relevant entities, typelists, configurations, plugins, Gosu classes, XML files, and integration points required for this implementation.
+4. Use only implementation patterns, APIs, entity properties, methods, classes, configurations, and framework components that are verified from the codebase.
+5. Treat the codebase as the source of truth and not generic Guidewire documentation.
+
+Requirement:
+
+- Retrieve all active policies whose expiration date falls within the next 85 days.
+- Do not create activities, notifications, emails, updates, or database changes.
+- Only fetch and print policy details.
+
+For each policy print:
+
+- Policy Number
+- Account Holder Name
+- Effective Date
+- Expiration Date
+
+At the end print:
+
+- Total Policies Found
+
+Strict Rules:
+
+- Do not assume anything.
+- Do not invent anything.
+- Do not generate code based on generic Guidewire examples.
+- Do not invent typecodes.
+- Do not invent class names.
+- Do not invent method names.
+- Do not invent entity properties.
+- Do not invent plugin registrations.
+- Do not invent scheduler entries.
+- Do not invent XML configurations.
+- Do not invent query APIs.
+- Do not invent logger APIs.
+- Do not invent typelist values.
+- Do not invent entity relationships.
+- Do not invent package structures.
+- Do not invent configuration files.
+- Every generated implementation detail must be traceable to and verified from the codebase.
+- If a property, method, class, API, entity relationship, configuration, file, or pattern cannot be verified from the codebase, mark it as "TBD - Not Verified in Codebase".
+- Prefer "TBD" over assumptions.
+- Verify every field, method call, logger call, query API, and configuration before using it.
+
+Output:
+
+1. Existing Batch Process Pattern Analysis
+2. Verified Entity Analysis
+3. Verified Configuration Analysis
+4. Files Requiring Modification
+5. Business Logic Design
+6. Query Design
+7. Execution Flow
+8. Logging Approach
+9. HLD
+10. LLD
+11. TBD Items
+12. Implementation Plan
+
+Generate implementation details only when they are verified from the analyzed codebase. Any unverified detail must be marked as TBD.
