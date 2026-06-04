@@ -1,0 +1,32 @@
+package gw.processes
+
+uses org.slf4j.Logger
+uses org.slf4j.LoggerFactory
+
+class ASTRANPETestBatch extends BatchProcessBase {
+
+  static final var LOGGER = LoggerFactory.getLogger("ASTRANPETestBatch")
+
+  construct() {
+    super()
+  }
+
+  override function doWork() {
+
+    var policyPeriod = Query.make(PolicyPeriod).select().FirstResult
+
+    // Intentional NPE #1
+    var accountName = policyPeriod.Account.DisplayName
+
+    // Intentional NPE #2
+    var producerCode = policyPeriod.ProducerCode.Code
+
+    // Intentional NPE #3
+    var upperName = accountName.toUpperCase()
+
+    LOGGER.info("Account Name: " + upperName)
+    LOGGER.info("Producer Code: " + producerCode)
+
+    return 1
+  }
+}
