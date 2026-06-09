@@ -1,0 +1,52 @@
+You are a Senior Guidewire PolicyCenter Developer and Debugging Expert.
+
+Context:
+I have provided 3 PCF files and 3 Gosu class files related to a custom "Rating Worksheet Comparator" feature created under Administration → Utilities.
+
+Feature Objective:
+
+- The comparator accepts two transactions as input.
+- It compares Rating Worksheet data between the selected transactions.
+- A new comparator screen displays comparison results.
+- One of the columns is "Instruction".
+- The requirement is to display the complete path from the root node to the leaf node description.
+- Each level in the hierarchy should be concatenated using " - " as a separator.
+
+Problem:
+
+- The implementation was originally developed in the main application where Rating Worksheet data exists.
+- In the training application, Rating Worksheet functionality/data is not available.
+- Because of this, I am unable to trace the actual entity relationships and hierarchy traversal logic.
+- I am stuck identifying how the root-to-leaf path should be generated and displayed in the Instruction column.
+
+Tasks:
+
+1. Analyze all provided PCF files and Gosu classes.
+2. Explain the overall flow of the Rating Worksheet Comparator feature.
+3. Identify:
+   - Entry point
+   - Screen flow
+   - Comparator service/class execution path
+   - Data retrieval logic
+   - Rating Worksheet entities involved
+4. Determine how the hierarchy is structured and how parent-child relationships are traversed.
+5. Find the correct logic to build the Instruction column value in the format:
+   Root Description - Child Description - Sub Child Description - Leaf Description
+6. If the exact implementation cannot be determined because Rating Worksheet entities are unavailable, infer the most likely entity structure from the code and provide:
+   - Proposed traversal algorithm
+   - Gosu sample code
+   - Required entity fields
+   - Potential joins/relationships
+7. Highlight any missing dependencies, plugins, typelists, entities, or configuration that may exist only in the main application.
+8. Provide a step-by-step debugging approach to verify the hierarchy path generation once access to Rating Worksheet data becomes available.
+
+Output Format:
+
+1. Feature Flow Analysis
+2. File-by-File Analysis
+3. Entity Relationship Analysis
+4. Root-to-Leaf Path Generation Logic
+5. Recommended Gosu Implementation
+6. Missing Dependencies/Assumptions
+7. Debugging Steps
+8. Final Recommendation
