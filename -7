@@ -1,0 +1,11 @@
+I have a CSV containing:
+incident_id
+short_description
+description
+work_notes
+
+Generate a Python script that:
+1. Reads the CSV
+2. Combines the text fields
+3. Creates embeddings using BAAI/bge-small-en-v1.5
+4. Stores them in a Qdrant collection named incidents
