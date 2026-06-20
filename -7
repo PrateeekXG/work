@@ -9,3 +9,64 @@ Generate a Python script that:
 2. Combines the text fields
 3. Creates embeddings using BAAI/bge-small-en-v1.5
 4. Stores them in a Qdrant collection named incidents
+
+
+
+
+
+
+pip install qdrant-client
+pip install sentence-transformers
+pip install pandas
+
+
+python ingest.py
+
+
+
+Create a Python function search_similar_incidents(query, top_k=5)
+that:
+1. Creates an embedding using bge-small-en-v1.5
+2. Searches Qdrant collection incidents
+3. Returns incident_id, score, short_description and work_notes
+
+
+search.py
+
+
+
+
+results = search_similar_incidents(
+    "rating worksheet comparator failing"
+)
+
+
+
+
+pip install mcp
+
+Create an MCP server using FastMCP.
+Expose a tool called search_similar_incidents.
+The tool should call the search function from search.py and return top 5 incidents.
+save as- server.py
+
+python server.py
+
+
+
+
+pip install streamlit
+
+Create a Streamlit app with:
+
+- Title: Guidewire Incident Copilot
+- Text area for incident description
+- Search button
+- Display top 5 similar incidents
+- Show similarity score
+- Expandable work notes section
+save as- app.py
+
+
+
+
