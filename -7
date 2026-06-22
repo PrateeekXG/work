@@ -68,5 +68,73 @@ Create a Streamlit app with:
 save as- app.py
 
 
+###########
+
+I already have a semantic search application using Qdrant vector database and Streamlit.
+
+Create a new Python file called test_ollama.py that connects to a locally running Ollama instance and sends a simple prompt to model qwen3:4b.
+
+Print the response to console.
+
+Use the latest Ollama Python library and provide complete code and required pip install commands.
+
+
+
+
+
+
+
+I have a function search_similar_incidents(query, top_k) that returns the most similar incidents from Qdrant.
+
+Create a new function generate_incident_analysis(query, incidents).
+
+The function should:
+
+1. Accept the user incident description.
+2. Accept the retrieved incidents.
+3. Build a prompt containing the incident description and historical incidents.
+4. Call Ollama model qwen3:4b.
+5. Return:
+   - Probable root cause
+   - Supporting evidence
+   - Recommended resolution
+   - Confidence level
+
+Provide complete Python implementation.
+
+
+
+
+
+
+Refactor my application into a Retrieval Augmented Generation (RAG) workflow.
+
+Current flow:
+User Query -> Qdrant Search -> Similar Incidents
+
+Target flow:
+User Query -> Qdrant Search -> Retrieve Top 5 Incidents -> Build Context -> Ollama (qwen3:4b) -> Generate RCA and Resolution
+
+Show architecture and code changes required in search.py.
+
+
+
+
+
+
+
+Update my Streamlit application so that after similar incidents are retrieved, the user can click "Generate RCA". The button should call the Ollama-powered RAG workflow and display:
+Root Cause Analysis
+Recommended Resolution
+Confidence Score
+Historical Incidents Used
+
+
+
+
+
+
+
+
 
 
