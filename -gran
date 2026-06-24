@@ -1,0 +1,95 @@
+Create a Python script that reads Guidewire incident data from incidents.csv.
+
+Requirements:
+- Use pandas
+- Load all incidents
+- Handle missing values
+- Combine useful fields (incident id, short description, work notes, resolution notes) into a searchable text field
+- Print total incident count
+- Keep code modular for future embedding generation
+
+
+
+
+
+Create a Python module that generates embeddings for incident records.
+
+Requirements:
+- Use sentence-transformers
+- Model: BAAI/bge-small-en-v1.5
+- Generate one embedding per incident
+- Store incident metadata along with embeddings
+- Add logging and progress information
+- Design for approximately 4000 incidents
+
+
+
+
+
+Create a Python script to store incident embeddings in Qdrant.
+
+Requirements:
+- Use local Qdrant database
+- Create collection named incidents
+- Vector size should match embedding model output
+- Store incident id, description, work notes and resolution notes as payload
+- Support insert and update operations
+- Add logging and error handling
+
+
+
+
+Create a semantic search module for incident retrieval.
+
+Requirements:
+- Accept free text incident description
+- Generate embedding using BAAI/bge-small-en-v1.5
+- Search Qdrant collection
+- Return top K similar incidents
+- Include similarity score and incident metadata
+- Return results as JSON
+
+
+
+
+Create a Streamlit application for semantic incident search.
+
+Requirements:
+- Text area for incident description
+- Search button
+- User configurable top K results
+- Display incident id
+- Display similarity score
+- Display short description
+- Expandable section for work notes and resolution notes
+- Clean enterprise UI
+
+
+
+
+Create an MCP compatible HTTP service exposing incident search capability.
+
+Requirements:
+- Use FastAPI
+- Endpoint: /api/search
+- Accept incident description and top_k
+- Call semantic search module
+- Return JSON response
+- Keep retrieval logic separate from API layer
+
+
+
+
+
+Generate technical documentation for the incident retrieval system.
+
+Include:
+- Architecture diagram
+- CSV ingestion flow
+- Embedding generation flow
+- Qdrant storage
+- Query processing
+- Similarity search
+- Streamlit usage
+- MCP service usage
+- Performance characteristics
