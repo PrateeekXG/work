@@ -1,0 +1,219 @@
+I want to build a semantic incident search system for approximately 50,000 historical Guidewire incidents.
+
+Provide a complete architecture and folder structure using:
+
+- Python
+- Qdrant
+- Sentence Transformers
+- Streamlit
+
+The system should support:
+
+1. CSV ingestion
+2. Embedding generation
+3. Vector storage
+4. Semantic search
+5. Top 5 similar incident retrieval
+
+Do not implement RCA or LLM generation yet.
+
+Provide recommended project structure and data flow.
+
+
+
+
+
+Create csv_loader.py.
+
+Requirements:
+
+- Read incidents.csv
+- Handle 50,000+ incidents
+- Use chunk processing
+- Handle missing values
+- Combine:
+  - Incident ID
+  - Short Description
+  - Description
+  - Work Notes
+
+into a searchable text field.
+
+Return structured incident records.
+
+Add logging and validation.
+
+
+
+
+
+Create embedding_service.py.
+
+Requirements:
+
+- Use sentence-transformers
+- Model: BAAI/bge-small-en-v1.5
+- Generate embeddings in batches
+- Configurable batch size
+- Support 50,000+ incidents
+- Add progress tracking
+- Return embeddings and metadata
+
+Include best practices for performance and memory optimization.
+
+
+
+
+
+
+Create qdrant_service.py.
+
+Requirements:
+
+- Connect to local Qdrant
+- Create collection named incidents
+- Automatically determine vector dimensions from embedding model
+- Store:
+  - incident_id
+  - short_description
+  - description
+  - work_notes
+
+as payload
+
+Support:
+
+- create collection
+- insert vectors
+- upsert vectors
+- delete vectors
+
+Add logging and exception handling.
+
+
+
+
+
+Create ingestion_runner.py.
+
+Requirements:
+
+Flow:
+
+CSV
+→ Chunk Processing
+→ Embedding Generation
+→ Qdrant Storage
+
+Support:
+
+- 50,000+ incidents
+- Batch inserts
+- Progress logs
+- Failure recovery
+- Processing statistics
+
+Display:
+
+- Total incidents processed
+- Total vectors stored
+- Processing duration
+
+
+
+
+
+
+Create search_service.py.
+
+Requirements:
+
+Input:
+
+- Incident description
+- top_k
+
+Flow:
+
+- Generate query embedding
+- Search Qdrant
+- Return top similar incidents
+
+Output:
+
+- Incident ID
+- Similarity score
+- Short description
+- Work notes
+
+Return JSON response.
+
+Add configurable similarity threshold.
+
+
+
+
+
+
+
+Create a Streamlit application.
+
+Requirements:
+
+UI Components:
+
+- Incident description textbox
+- Top K dropdown
+- Search button
+
+Results:
+
+- Incident ID
+- Similarity Score
+- Short Description
+- Expandable Work Notes
+
+Use clean enterprise styling.
+
+Connect to search_service.py.
+
+
+
+
+
+
+Create a FastAPI based MCP-compatible service.
+
+Endpoint:
+
+POST /search
+
+Input:
+{
+"query": "...",
+"top_k": 5
+}
+
+Output:
+Top similar incidents from Qdrant.
+
+Keep retrieval logic separate from API layer.
+
+
+
+
+
+
+Generate technical documentation for the incident retrieval system.
+
+Include:
+
+- Architecture
+- Embedding flow
+- Qdrant flow
+- Search flow
+- Streamlit flow
+- MCP flow
+- Scalability for 50,000+ incidents
+
+Provide architecture diagrams using ASCII.
